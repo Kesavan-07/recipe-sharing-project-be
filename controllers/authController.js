@@ -6,8 +6,7 @@ const { JWT_SECRET } = require("../utils/config");
 const SALT_ROUNDS = 10;
 
 const authController = {
-  // Sign up
-  signup: async (req, res) => {
+  register: async (req, res) => {
     try {
       const { username, email, password } = req.body;
 
@@ -43,20 +42,17 @@ const authController = {
       } catch (error) {
         // If the error is due to duplicate key error (email)
         if (error.code === 11000) {
-          return res
-            .status(400)
-            .json({
-              message: "Email already in use. Please use a different email.",
-            });
+          return res.status(400).json({
+            message: "Email already in use. Please use a different email.",
+          });
         }
 
         // Log and respond with a generic server error message
         console.error("Error creating user:", error);
         res.status(500).json({ message: "Server error while creating user" });
       }
-
     } catch (error) {
-      console.error(error); 
+      console.error(error);
       res.status(500).json({ message: error.message });
     }
   },
@@ -106,7 +102,7 @@ const authController = {
   // Get user profile
   myProfile: async (req, res) => {
     try {
-      const userId = req.userId; 
+      const userId = req.userId;
 
       const user = await User.findById(userId).select("-password");
       if (!user) {
