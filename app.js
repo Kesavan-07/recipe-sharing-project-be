@@ -31,4 +31,8 @@ app.use("/", recipeRouter);
 app.use("/", authRouter);
 app.use("/", userRouter);
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Recipe Sharing API!");
+});
+
 module.exports = app;
