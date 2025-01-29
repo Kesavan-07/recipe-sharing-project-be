@@ -1,13 +1,29 @@
 const mongoose = require("mongoose");
 
-const userSchema = new mongoose.Schema({
-  username: { type: String, required: true }, // `required: true` means it must be provided
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  bio: { type: String },
-  profilePicture: { type: String },
-  savedRecipes: [{ type: mongoose.Schema.Types.ObjectId, ref: "Recipe" }],
-});
+const UserSchema = new mongoose.Schema(
+  {
+    username: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    role: {
+      type: String,
+      enum: ["user", "admin"], // ✅ Ensure only "user" or "admin" is accepted
+      required: true, // ✅ Force role to be saved
+    },
+  },
+  { timestamps: true }
+);
 
-const User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", UserSchema);
+
 module.exports = User;

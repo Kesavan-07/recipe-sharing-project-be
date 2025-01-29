@@ -8,37 +8,48 @@ const SALT_ROUNDS = 10;
 const authController = {
   register: async (req, res) => {
     try {
-      const { username, email, password } = req.body;
+      console.log("🔹 Incoming Registration Data:", req.body); // ✅ Log raw input
 
-      if (!username || !email || !password) {
-        return res.status(400).json({ message: "All fields are required" });
+      const { username, email, password, role } = req.body;
+
+      if (!role) {
+        console.warn("⚠️ No role provided in request. Defaulting to 'user'.");
       }
 
       const existingUser = await User.findOne({ email });
       if (existingUser) {
+        console.warn("⚠️ User already exists:", existingUser);
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, SALT_ROUNDS);
-
+      const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({
         username,
         email,
         password: hashedPassword,
+        role: role || "user", // ✅ Ensure role is set
       });
 
       await newUser.save();
-      res.status(201).json({ message: "User registered successfully" });
+      console.log("✅ User Registered Successfully:", newUser); // ✅ Log saved user
+
+      res
+        .status(201)
+        .json({ message: "User registered successfully", user: newUser });
     } catch (error) {
-      res.status(500).json({ message: "Server error", error });
+      console.error("❌ Error Registering User:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
+
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res.status(400).json({ message: "Email and password are required" });
+        return res
+          .status(400)
+          .json({ message: "Email and password are required" });
       }
 
       const user = await User.findOne({ email });
@@ -60,20 +71,22 @@ const authController = {
     }
   },
 
- myProfile: async (req, res) => {
+  myProfile: async (req, res) => {
     try {
+      console.log("Fetching profile for user ID:", req.userId); // ✅ Debugging
+
       const user = await User.findById(req.userId).select("-password");
 
       if (!user) {
+        console.warn("User not found in database:", req.userId);
         return res.status(404).json({ message: "User not found" });
       }
 
-      // ✅ Ensure role is included (set default if missing)
-      res.status(200).json({ 
+      res.status(200).json({
         _id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role || "user" // Set default role if missing
+        role: user.role || "user", // ✅ Ensure role is returned
       });
     } catch (error) {
       console.error("Error fetching user profile:", error);
