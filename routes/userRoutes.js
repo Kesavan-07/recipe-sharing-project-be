@@ -4,20 +4,20 @@ const auth = require("../middleware/auth");
 
 const userRouter = express.Router();
 
-userRouter.get("/api/v1/profile", auth.verifylogin, userController.getUserProfile);
-
-userRouter.put("/api/v1/profile", auth.verifylogin, userController.updateUserProfile);
-
-userRouter.get("/api/v1/saved-recipes", auth.verifylogin, userController.getSavedRecipes);
-
-userRouter.post("/api/v1/saved-recipes", auth.verifylogin, userController.saveRecipe);
-
-userRouter.delete("/api/v1/saved-recipes", auth.verifylogin, userController.removeSavedRecipe);
-
-userRouter.post("/api/v1/comments", auth.verifylogin, userController.addComment);
-
-userRouter.delete("/api/v1/comments", auth.verifylogin, userController.removeComment);
-
-
+userRouter.get("/profile", auth.verifyLogin, userController.getUserProfile);
+userRouter.put("/profile", auth.verifyLogin, userController.updateUserProfile);
+userRouter.get(
+  "/saved-recipes",
+  auth.verifyLogin,
+  userController.getSavedRecipes
+);
+userRouter.post("/saved-recipes", auth.verifyLogin, userController.saveRecipe);
+userRouter.delete(
+  "/saved-recipes",
+  auth.verifyLogin,
+  userController.removeSavedRecipe
+);
+userRouter.post("/comments", auth.verifyLogin, userController.addComment);
+userRouter.delete("/comments", auth.verifyLogin, userController.removeComment);
 
 module.exports = userRouter;

@@ -1,13 +1,11 @@
 const jwt = require("jsonwebtoken");
 const { JWT_SECRET } = require("../utils/config");
 
-const verifylogin = (req, res, next) => {
+const verifyLogin = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    return res
-      .status(401)
-      .json({ message: "Unauthorized access: No token provided" });
+    return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
 
   try {
@@ -19,4 +17,4 @@ const verifylogin = (req, res, next) => {
   }
 };
 
-module.exports = { verifylogin };
+module.exports = { verifyLogin };

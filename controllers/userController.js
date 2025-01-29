@@ -5,7 +5,7 @@ const userController = {
   // Fetch user profile
   getUserProfile: async (req, res) => {
     try {
-      const user = await User.findById(req.user.id).select("-password");
+      const user = await User.findById(req.userId).select("-password");
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -22,7 +22,7 @@ const userController = {
 
     try {
       const user = await User.findByIdAndUpdate(
-        req.user.id,
+        req.userId, // ✅ Fixed `req.user.id` to `req.userId`
         { username, email, bio, profilePicture },
         { new: true, runValidators: true }
       ).select("-password");
@@ -41,7 +41,7 @@ const userController = {
   // Fetch saved recipes
   getSavedRecipes: async (req, res) => {
     try {
-      const user = await User.findById(req.user.id).populate("savedRecipes");
+      const user = await User.findById(req.userId).populate("savedRecipes");
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -57,7 +57,7 @@ const userController = {
     const { recipeId } = req.body;
 
     try {
-      const user = await User.findById(req.user.id);
+      const user = await User.findById(req.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -79,7 +79,7 @@ const userController = {
     const { recipeId } = req.body;
 
     try {
-      const user = await User.findById(req.user.id);
+      const user = await User.findById(req.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -106,7 +106,7 @@ const userController = {
         return res.status(404).json({ message: "Recipe not found" });
       }
 
-      const newComment = { user: req.user.id, comment, createdAt: new Date() };
+      const newComment = { user: req.userId, comment, createdAt: new Date() };
       recipe.comments.push(newComment);
       await recipe.save();
 
