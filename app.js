@@ -8,7 +8,7 @@ const userRouter = require("./routes/userRoutes");
 const app = express();
 // CORS Configuration
 const corsOptions = {
-  origin: "https://recipe-k7.netlify.app", // Allow specific origin
+  origin: "*", // https://recipe-k7.netlify.app
   credentials: true, // Allow cookies and authentication headers
   methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
   allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
