@@ -59,11 +59,13 @@ const authController = {
 
   // Login
   login: async (req, res) => {
+    console.log("Login request received:", req.body);
+
     try {
       const { email, password } = req.body;
 
       // Find the user by email
-      const user = await User.findOne({ email });
+     const user = await User.findOne({ email});
       if (!user) {
         return res.status(400).json({ message: "User does not exist" });
       }
