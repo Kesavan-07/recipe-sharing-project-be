@@ -33,15 +33,12 @@ const authController = {
       res.status(500).json({ message: "Server error", error });
     }
   },
-
   login: async (req, res) => {
     try {
       const { email, password } = req.body;
 
       if (!email || !password) {
-        return res
-          .status(400)
-          .json({ message: "Email and password are required" });
+        return res.status(400).json({ message: "Email and password are required" });
       }
 
       const user = await User.findOne({ email });
@@ -58,19 +55,29 @@ const authController = {
 
       res.status(200).json({ token, user });
     } catch (error) {
+      console.error("Login error:", error);
       res.status(500).json({ message: "Server error", error });
     }
   },
 
-  myProfile: async (req, res) => {
+ myProfile: async (req, res) => {
     try {
       const user = await User.findById(req.userId).select("-password");
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
-      res.status(200).json({ user });
+
+      // ✅ Ensure role is included (set default if missing)
+      res.status(200).json({ 
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role || "user" // Set default role if missing
+      });
     } catch (error) {
-      res.status(500).json({ message: "Server error", error });
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
 
@@ -78,5 +85,11 @@ const authController = {
     res.status(200).json({ message: "Logout successful" });
   },
 };
-
+  // // Logout
+  // logout: async (req, res) => {
+  // res.clearCookie("token", {
+  //   httpOnly: true,
+  //   secure: false, // Ensure this is false in development if testing locally
+  //   sameSite: "None", // Important for cross-origin requests
+  // });
 module.exports = authController;

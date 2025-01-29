@@ -5,10 +5,4 @@
 
 
 
-  // Logout
-  logout: async (req, res) => {
-  res.clearCookie("token", {
-    httpOnly: true,
-    secure: false, // Ensure this is false in development if testing locally
-    sameSite: "None", // Important for cross-origin requests
-  });
+
