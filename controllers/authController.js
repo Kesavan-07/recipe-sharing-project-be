@@ -93,11 +93,15 @@ const authController = {
   },
 
   // Logout
-  logout: (req, res) => {
-    // Clear the JWT token cookie
-    res.clearCookie("token");
-    return res.status(200).json({ message: "Logged out successfully" });
-  },
+  logout: async (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: false, // Ensure this is false in development if testing locally
+    sameSite: "None", // Important for cross-origin requests
+  });
+
+  return res.status(200).json({ message: "Logged out successfully" });
+},
 
   // Get user profile
   myProfile: async (req, res) => {
