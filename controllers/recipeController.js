@@ -1,62 +1,49 @@
 const Recipe = require("../models/Recipe");
 
 const recipeController = {
-  // ✅ Create Recipe
+  // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
     try {
-      const {
-        title,
-        ingredients,
-        instructions,
-        cookingTime,
-        servings,
-        image,
-        video,
-      } = req.body;
+      const { title, ingredients, instructions, cookingTime, servings, video } =
+        req.body;
 
-      // ✅ Check if the recipe already exists
-      const recipeExists = await Recipe.findOne({ title });
-      if (recipeExists) {
-        return res
-          .status(400)
-          .json({ message: "Recipe with this title already exists." });
+      // ✅ Ensure that the user is logged in before creating a recipe
+      if (!req.user) {
+        return res.status(401).json({ message: "Unauthorized" });
       }
 
-      // ✅ Create new recipe
+      // ✅ If an image is uploaded, save the file path
+      const imagePath = req.file ? `/uploads/${req.file.filename}` : "";
+
       const newRecipe = new Recipe({
         title,
         ingredients,
         instructions,
         cookingTime,
         servings,
-        image: image || "https://via.placeholder.com/150", // Default image
-        video: video || "", // Default empty video
+        image: imagePath, // Store the uploaded image path
+        video: video || "",
+        user: req.user.id,
       });
 
       await newRecipe.save();
-      console.log("📌 New Recipe Created:", newRecipe); // ✅ Debugging log
       res
         .status(201)
         .json({ message: "Recipe created successfully", recipe: newRecipe });
     } catch (error) {
-      console.error("❌ Error creating recipe:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
 
-  // ✅ Get All Recipes
+  // ✅ Get All Recipes (Include Image URL)
   getAllRecipes: async (req, res) => {
     try {
       const recipes = await Recipe.find({}).lean();
-      console.log("📌 Fetched Recipes:", recipes.length);
-
       if (!recipes.length) {
         return res.status(404).json({ message: "No recipes found." });
       }
-
-      res.status(200).json(recipes); // ✅ Return an array instead of { recipes: [...] }
+      res.status(200).json(recipes);
     } catch (error) {
-      console.error("❌ Error fetching recipes:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
@@ -70,8 +57,25 @@ const recipeController = {
       }
       res.status(200).json(recipe);
     } catch (error) {
-      console.error("❌ Error fetching recipe by ID:", error);
       res.status(500).json({ message: "Server error", error: error.message });
+    }
+  },
+
+  // ✅ Get User's Own Recipes
+  getMyRecipes: async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const myRecipes = await Recipe.find({ user: userId });
+
+      if (!myRecipes.length) {
+        return res
+          .status(404)
+          .json({ message: "No recipes found for this user." });
+      }
+
+      res.status(200).json(myRecipes);
+    } catch (error) {
+      res.status(500).json({ message: "Server error" });
     }
   },
 
@@ -88,29 +92,11 @@ const recipeController = {
         return res.status(404).json({ message: "Recipe not found" });
       }
 
-      console.log("📌 Recipe Updated:", updatedRecipe);
       res
         .status(200)
         .json({ message: "Recipe updated", recipe: updatedRecipe });
     } catch (error) {
-      console.error("❌ Error updating recipe:", error);
       res.status(500).json({ message: "Server error", error: error.message });
-    }
-  },
-  getMyRecipes: async (req, res) => {
-    try {
-      const userId = req.user.id; // ✅ Ensure authentication middleware is used
-      const myRecipes = await Recipe.find({ user: userId });
-
-      if (!myRecipes.length) {
-        return res.status(404).json({ message: "No recipes found for this user." });
-      }
-
-      console.log("📌 User Recipes:", myRecipes);
-      res.status(200).json(myRecipes);
-    } catch (error) {
-      console.error("❌ Error fetching user's recipes:", error);
-      res.status(500).json({ message: "Server error" });
     }
   },
 
@@ -122,10 +108,8 @@ const recipeController = {
         return res.status(404).json({ message: "Recipe not found" });
       }
 
-      console.log("📌 Recipe Deleted:", deletedRecipe);
       res.status(200).json({ message: "Recipe deleted successfully" });
     } catch (error) {
-      console.error("❌ Error deleting recipe:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
