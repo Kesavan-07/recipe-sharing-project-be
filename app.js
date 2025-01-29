@@ -6,14 +6,23 @@ const recipeRouter = require("./routes/recipeRoutes");
 const userRouter = require("./routes/userRoutes");
 
 const app = express();
-// CORS Configuration
-const corsOptions = {
-  origin: "*", // https://recipe-k7.netlify.app
-  credentials: true, // Allow cookies and authentication headers
-  methods: ["GET", "POST", "PUT", "DELETE"], // Allowed methods
-  allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
-};
+const allowedOrigins = [
+  "http://localhost:5173", // For local development
+  "https://recipe-k7.netlify.app", // Deployed frontend
+];
 
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 app.use(cors(corsOptions));
 app.use(morgan("dev"));
 app.use(express.json());
