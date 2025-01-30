@@ -28,5 +28,46 @@ router.delete("/:id", auth.verifyLogin, recipeController.deleteRecipe);
 router.post("/rate", auth.verifyLogin, recipeController.rateRecipe);
 router.post("/comment", auth.verifyLogin, recipeController.addComment);
 router.delete("/comment", auth.verifyLogin, recipeController.deleteComment);
+router.post("/:id/like", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const recipe = await Recipe.findById(req.params.id);
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    if (recipe.likes.includes(userId)) {
+      recipe.likes = recipe.likes.filter((id) => id !== userId); // Unlike
+    } else {
+      recipe.likes.push(userId); // Like
+    }
+
+    await recipe.save();
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error("Error liking recipe:", error.message || error);
+    res.status(500).json({ message: "Failed to like recipe" });
+  }
+});
+router.post("/:id/comments", async (req, res) => {
+  try {
+    const { userId, text } = req.body;
+    const recipe = await Recipe.findById(req.params.id);
+
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    const comment = { user: userId, text, createdAt: new Date() };
+    recipe.comments.push(comment);
+
+    await recipe.save();
+    res.status(200).json(recipe);
+  } catch (error) {
+    console.error("Error adding comment:", error.message || error);
+    res.status(500).json({ message: "Failed to add comment" });
+  }
+});
 
 module.exports = router;
