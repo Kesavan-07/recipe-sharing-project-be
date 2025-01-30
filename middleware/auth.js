@@ -33,16 +33,6 @@ const auth = {
     }
   },
 
-  // Middleware to verify admin access
-  verifyAdmin: (req, res, next) => {
-    if (!req.user || req.user.role !== "admin") {
-      return res
-        .status(403)
-        .json({ message: "Forbidden: Admin access required." });
-    }
-    next();
-  },
-
   // Middleware to verify user can follow/unfollow (Authentication required)
   verifyFollow: async (req, res, next) => {
     try {

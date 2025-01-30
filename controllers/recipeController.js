@@ -187,30 +187,29 @@ const recipeController = {
     }
   },
   likeRecipe: async (req, res) => {
-    try {
-      const { userId } = req.body; // Ensure userId is received
-      const recipeId = req.params.id;
+   try {
+    const recipeId = req.params.id;
+    const userId = req.userId; // User ID from auth middleware
 
-      const recipe = await Recipe.findById(recipeId);
+    const recipe = await Recipe.findById(recipeId);
 
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
-
-      if (recipe.likes.includes(userId)) {
-        // Unlike the recipe
-        recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
-      } else {
-        // Like the recipe
-        recipe.likes.push(userId);
-      }
-
-      await recipe.save();
-      res.status(200).json(recipe); // Return the updated recipe
-    } catch (err) {
-      console.error("Error liking recipe:", err.message || err);
-      res.status(500).json({ message: "Failed to like recipe" });
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
     }
+
+    // Check if the user has already liked the recipe
+    if (recipe.likes.includes(userId)) {
+      recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
+    } else {
+      recipe.likes.push(userId);
+    }
+
+    await recipe.save();
+    res.status(200).json({ message: "Recipe liked/unliked", likes: recipe.likes.length });
+  } catch (error) {
+    console.error("Error liking recipe:", error);
+    res.status(500).json({ message: "Failed to like recipe", error: error.message });
+  }
   },
 };
 module.exports = recipeController;
