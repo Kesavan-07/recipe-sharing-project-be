@@ -28,7 +28,7 @@ const RecipeSchema = new mongoose.Schema(
     video: { type: String, default: "" },
     ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }],
     comments: [CommentSchema],
-    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    likes: [String],
 
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // ✅ Fix: Add this field
   },
