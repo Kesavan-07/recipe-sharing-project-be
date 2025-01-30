@@ -30,7 +30,7 @@ router.post("/comment", auth.verifyLogin, recipeController.addComment);
 router.delete("/comment", auth.verifyLogin, recipeController.deleteComment);
 router.post("/:id/like", async (req, res) => {
   try {
-    const { userId } = req.body;
+    const { userId } = req.body; // Extract userId from the request body
     const recipe = await Recipe.findById(req.params.id);
 
     if (!recipe) {
@@ -38,21 +38,24 @@ router.post("/:id/like", async (req, res) => {
     }
 
     if (recipe.likes.includes(userId)) {
-      recipe.likes = recipe.likes.filter((id) => id !== userId); // Unlike
+      // Unlike the recipe
+      recipe.likes = recipe.likes.filter((id) => id !== userId);
     } else {
-      recipe.likes.push(userId); // Like
+      // Like the recipe
+      recipe.likes.push(userId);
     }
 
     await recipe.save();
-    res.status(200).json(recipe);
+    res.status(200).json(recipe); // Return the updated recipe
   } catch (error) {
     console.error("Error liking recipe:", error.message || error);
     res.status(500).json({ message: "Failed to like recipe" });
   }
 });
+
 router.post("/:id/comments", async (req, res) => {
   try {
-    const { userId, text } = req.body;
+    const { userId, text } = req.body; // Extract userId and comment text
     const recipe = await Recipe.findById(req.params.id);
 
     if (!recipe) {
@@ -63,11 +66,12 @@ router.post("/:id/comments", async (req, res) => {
     recipe.comments.push(comment);
 
     await recipe.save();
-    res.status(200).json(recipe);
+    res.status(200).json(recipe); // Return the updated recipe
   } catch (error) {
     console.error("Error adding comment:", error.message || error);
     res.status(500).json({ message: "Failed to add comment" });
   }
 });
+
 
 module.exports = router;
