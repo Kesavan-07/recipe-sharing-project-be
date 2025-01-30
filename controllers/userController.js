@@ -148,6 +148,27 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
+    uploadProfilePicture: async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded." });
+      }
+
+      const user = await User.findById(req.user._id); // Ensure user exists
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      // Save the file path to the user's profile
+      user.profilePicture = `/uploads/${req.file.filename}`;
+      await user.save();
+
+      res.status(200).json({ message: "Profile picture updated successfully!" });
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      res.status(500).json({ message: "Server error", error });
+    }
+  },
 };
 
 module.exports = userController;
