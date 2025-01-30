@@ -40,14 +40,14 @@ const recipeController = {
   },
 
   // ✅ Get My Recipes
-  getMyRecipes: async (req, res) => {
+ getMyRecipes: async (req, res) => {
     try {
-      // Fetch recipes where the user ID matches the logged-in user's ID
+      console.log("Fetching recipes for user ID:", req.user._id); // ✅ Debugging
+
       const recipes = await Recipe.find({ user: req.user._id });
 
-      // If no recipes found, return an empty array
       if (!recipes || recipes.length === 0) {
-        return res.status(200).json([]); // Return empty array to avoid frontend confusion
+        return res.status(200).json([]); // ✅ Return an empty array instead of an error
       }
 
       res.status(200).json(recipes);

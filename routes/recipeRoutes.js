@@ -10,13 +10,18 @@ router.get("/all", recipeController.getAllRecipes);
 router.get("/:id", recipeController.getRecipeById);
 
 // ✅ Protected Routes (Require Authentication)
-router.post("/create", auth.verifyLogin,upload.single("image"), recipeController.createRecipe);
+router.post(
+  "/create",
+  auth.verifyLogin,
+  upload.single("image"),
+  recipeController.createRecipe
+);
 router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
 router.put("/:id", auth.verifyLogin, recipeController.updateRecipe);
 router.delete("/:id", auth.verifyLogin, recipeController.deleteRecipe);
-router.post("/rate", auth.verifyLogin, recipeController.rateRecipe); 
+router.post("/rate", auth.verifyLogin, recipeController.rateRecipe);
 router.post("/comment", auth.verifyLogin, recipeController.addComment);
-router.delete("/comment", auth.verifyLogin, recipeController.deleteComment);  // ✅ Delete a comment
+router.delete("/comment", auth.verifyLogin, recipeController.deleteComment); // ✅ Delete a comment
 router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
-
+router.get("/:id", recipeController.getRecipeById);
 module.exports = router;
