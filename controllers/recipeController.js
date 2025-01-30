@@ -3,30 +3,32 @@ const Recipe = require("../models/Recipe");
 const recipeController = {
   // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
-    try {
-      const { title, ingredients, instructions, cookingTime, servings, video } =
-        req.body;
-      const image = req.file ? `/uploads/${req.file.filename}` : ""; // 🔹 Save uploaded image path
+ try {
+    const { title, ingredients, steps, cookingTime, servings, video } = req.body;
+    const image = req.file?.path || "";
 
-      const newRecipe = new Recipe({
-        title,
-        ingredients,
-        instructions,
-        cookingTime,
-        servings,
-        image,
-        video,
-        user: req.user.id,
-      });
-
-      await newRecipe.save();
-      res
-        .status(201)
-        .json({ message: "Recipe created successfully!", recipe: newRecipe });
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error });
+    if (!title || !ingredients || !steps) {
+      return res.status(400).json({ message: "Missing required fields" });
     }
-  },
+
+    const newRecipe = new Recipe({
+      title,
+      ingredients: ingredients.split(","),
+      steps,
+      cookingTime,
+      servings,
+      image,
+      video,
+      createdAt: new Date(),
+    });
+
+    const savedRecipe = await newRecipe.save();
+    res.status(201).json(savedRecipe);
+  } catch (error) {
+    console.error("Error creating recipe:", error);
+    res.status(500).json({ message: "Failed to create recipe" });
+  }
+},
 
   // ✅ Get All Recipes (Includes Username)
   getAllRecipes: async (req, res) => {

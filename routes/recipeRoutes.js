@@ -10,12 +10,8 @@ const router = express.Router();
 router.get("/all", recipeController.getAllRecipes);
 
 // ✅ Protected Routes (Require Authentication)
-router.post(
-  "/create",
-  auth.verifyLogin,
-  upload.single("image"),
-  recipeController.createRecipe
-);
+router.post("/create", auth.verifyLogin, upload.single("image"), recipeController.createRecipe);
+
 
 // ✅ Fix: Ensure this route comes BEFORE `/:id`
 router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
