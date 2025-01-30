@@ -4,22 +4,15 @@ const recipeController = {
   // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
     try {
-      console.log("🔍 Received Token User:", req.user); // ✅ Debugging Log
+      const { title, ingredients, instructions, cookingTime, servings, image } =
+        req.body;
 
+      // ✅ Check if user is logged in
       if (!req.user) {
         return res.status(401).json({ message: "Unauthorized: No user found" });
       }
 
-      const {
-        title,
-        ingredients,
-        instructions,
-        cookingTime,
-        servings,
-        image,
-        video,
-      } = req.body;
-
+      // ✅ Create new recipe with user ID
       const newRecipe = new Recipe({
         title,
         ingredients,
@@ -27,8 +20,7 @@ const recipeController = {
         cookingTime,
         servings,
         image: image || "https://via.placeholder.com/150",
-        video: video || "",
-        user: req.user.id, // ✅ Associate recipe with logged-in user
+        user: req.user._id, // ✅ Store user ID
       });
 
       await newRecipe.save();
@@ -44,17 +36,10 @@ const recipeController = {
   // ✅ Get All Recipes (Includes Username)
   getAllRecipes: async (req, res) => {
     try {
-      const recipes = await Recipe.find({})
-        .populate("user", "username email") // ✅ Populate user data
-        .lean();
-
-      if (!recipes.length) {
-        return res.status(404).json({ message: "No recipes found." });
-      }
-
+      const recipes = await Recipe.find({}).populate("user", "username email"); // ✅ Populate user details
       res.status(200).json(recipes);
     } catch (error) {
-      console.error("❌ Error fetching recipes:", error);
+      console.error("Error fetching recipes:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },

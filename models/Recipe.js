@@ -5,14 +5,13 @@ const RecipeSchema = new mongoose.Schema(
     title: { type: String, required: true },
     ingredients: { type: [String], required: true },
     instructions: { type: String, required: true },
-    cookingTime: { type: String },
-    servings: { type: Number },
-    image: { type: String, default: "https://via.placeholder.com/150" },
+    cookingTime: { type: Number, required: true },
+    servings: { type: Number, required: true },
+    image: { type: String },
     video: { type: String },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Add this line
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Reference to User model
   },
   { timestamps: true }
 );
 
-const Recipe = mongoose.model("Recipe", RecipeSchema);
-module.exports = Recipe;
+module.exports = mongoose.model("Recipe", RecipeSchema);
