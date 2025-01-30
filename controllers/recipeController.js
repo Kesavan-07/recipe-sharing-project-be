@@ -78,12 +78,13 @@ const recipeController = {
   // ✅ Get Recipe by ID
   getRecipeById: async (req, res) => {
     try {
-      const recipe = await Recipe.findById(req.params.id).lean();
+      const recipe = await Recipe.findById(req.params.id).lean(); // Fetch recipe by ID
       if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
+        return res.status(404).json({ message: "Recipe not found" }); // Handle not found
       }
-      res.status(200).json(recipe);
+      res.status(200).json(recipe); // Return the recipe
     } catch (error) {
+      console.error("Error fetching recipe by ID:", error.message || error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
