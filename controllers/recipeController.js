@@ -4,31 +4,42 @@ const recipeController = {
   // ✅ Create Recipe (With Image Upload)
 createRecipe: async (req, res) => {
    try {
-    console.log("🔍 User Data in Request:", req.user); // ✅ Debugging Log
+     console.log("🔍 Received Token User:", req.user); // ✅ Debugging Log
 
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: No user found" });
-    }
+     if (!req.user) {
+       return res.status(401).json({ message: "Unauthorized: No user found" });
+     }
 
-    const { title, ingredients, instructions, cookingTime, servings, image, video } = req.body;
+     const {
+       title,
+       ingredients,
+       instructions,
+       cookingTime,
+       servings,
+       image,
+       video,
+     } = req.body;
 
-    const newRecipe = new Recipe({
-      title,
-      ingredients,
-      instructions,
-      cookingTime,
-      servings,
-      image: image || "https://via.placeholder.com/150",
-      video: video || "",
-      user: req.user.id,
-    });
+     const newRecipe = new Recipe({
+       title,
+       ingredients,
+       instructions,
+       cookingTime,
+       servings,
+       image: image || "https://via.placeholder.com/150",
+       video: video || "",
+       user: req.user.id, // ✅ Associate recipe with logged-in user
+     });
 
-    await newRecipe.save();
-    res.status(201).json({ message: "Recipe created successfully", recipe: newRecipe });
-  } catch (error) {
-    console.error("❌ Error creating recipe:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+     await newRecipe.save();
+     res
+       .status(201)
+       .json({ message: "Recipe created successfully", recipe: newRecipe });
+   } catch (error) {
+     console.error("❌ Error creating recipe:", error);
+     res.status(500).json({ message: "Server error", error: error.message });
    }
+
   },
 
   // ✅ Get All Recipes (Includes Username)
