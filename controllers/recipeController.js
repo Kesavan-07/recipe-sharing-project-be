@@ -42,21 +42,18 @@ const recipeController = {
   // ✅ Get My Recipes
   getMyRecipes: async (req, res) => {
     try {
-      const userId = req.user.id;
-      const myRecipes = await Recipe.find({ user: userId })
-        .populate("user", "username email") // ✅ Populate user details
-        .lean();
+      // Fetch recipes where the user ID matches the logged-in user's ID
+      const recipes = await Recipe.find({ user: req.user._id });
 
-      if (!myRecipes.length) {
-        return res
-          .status(404)
-          .json({ message: "No recipes found for this user." });
+      // If no recipes found, return an empty array
+      if (!recipes || recipes.length === 0) {
+        return res.status(200).json([]); // Return empty array to avoid frontend confusion
       }
 
-      res.status(200).json(myRecipes);
+      res.status(200).json(recipes);
     } catch (error) {
-      console.error("❌ Error fetching user recipes:", error);
-      res.status(500).json({ message: "Server error", error: error.message });
+      console.error("Error fetching user recipes:", error);
+      res.status(500).json({ message: "Failed to fetch recipes." });
     }
   },
   // ✅ Update Recipe
@@ -109,7 +106,9 @@ const recipeController = {
     try {
       const { recipeId, rating } = req.body;
       if (rating < 1 || rating > 5) {
-        return res.status(400).json({ message: "Rating must be between 1 and 5 stars" });
+        return res
+          .status(400)
+          .json({ message: "Rating must be between 1 and 5 stars" });
       }
 
       const recipe = await Recipe.findById(recipeId);
@@ -118,7 +117,9 @@ const recipeController = {
       }
 
       // Check if user already rated
-      const existingRating = recipe.ratings.find((r) => r.user.toString() === req.user.id);
+      const existingRating = recipe.ratings.find(
+        (r) => r.user.toString() === req.user.id
+      );
       if (existingRating) {
         existingRating.rating = rating; // Update existing rating
       } else {
@@ -135,7 +136,8 @@ const recipeController = {
   addComment: async (req, res) => {
     try {
       const { recipeId, text } = req.body;
-      if (!text) return res.status(400).json({ message: "Comment cannot be empty" });
+      if (!text)
+        return res.status(400).json({ message: "Comment cannot be empty" });
 
       const recipe = await Recipe.findById(recipeId);
       if (!recipe) return res.status(404).json({ message: "Recipe not found" });
@@ -143,7 +145,10 @@ const recipeController = {
       recipe.comments.push({ user: req.user.id, text });
       await recipe.save();
 
-      res.json({ message: "Comment added successfully", comment: { user: req.user.id, text } });
+      res.json({
+        message: "Comment added successfully",
+        comment: { user: req.user.id, text },
+      });
     } catch (error) {
       res.status(500).json({ message: "Server error", error });
     }
@@ -160,14 +165,17 @@ const recipeController = {
         (comment) => comment._id.toString() === commentId
       );
 
-      if (commentIndex === -1) return res.status(404).json({ message: "Comment not found" });
+      if (commentIndex === -1)
+        return res.status(404).json({ message: "Comment not found" });
 
       // Only allow the user who created the comment or an admin to delete
       if (
         recipe.comments[commentIndex].user.toString() !== req.user.id &&
         req.user.role !== "admin"
       ) {
-        return res.status(403).json({ message: "Unauthorized: You cannot delete this comment" });
+        return res
+          .status(403)
+          .json({ message: "Unauthorized: You cannot delete this comment" });
       }
 
       // Remove the comment

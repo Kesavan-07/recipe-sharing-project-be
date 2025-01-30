@@ -17,7 +17,7 @@ const RecipeSchema = new mongoose.Schema(
     video: { type: String, default: "" },
     ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }], // ✅ Store ratings
     comments: [CommentSchema], // ✅ Store comments
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to user
   },
   { timestamps: true }
 );

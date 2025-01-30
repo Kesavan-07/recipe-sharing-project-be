@@ -17,5 +17,6 @@ router.delete("/:id", auth.verifyLogin, recipeController.deleteRecipe);
 router.post("/rate", auth.verifyLogin, recipeController.rateRecipe); 
 router.post("/comment", auth.verifyLogin, recipeController.addComment);
 router.delete("/comment", auth.verifyLogin, recipeController.deleteComment);  // ✅ Delete a comment
+router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
 
 module.exports = router;
