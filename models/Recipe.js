@@ -3,18 +3,18 @@ const mongoose = require("mongoose");
 const CommentSchema = new mongoose.Schema({
   comments: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Fix: Reference User
       text: { type: String, required: true },
       createdAt: { type: Date, default: Date.now },
     },
   ],
   ratings: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Fix: Reference User
       rating: { type: Number, required: true },
     },
   ],
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // ✅ Fix: Reference User
 });
 
 const RecipeSchema = new mongoose.Schema(
@@ -26,11 +26,14 @@ const RecipeSchema = new mongoose.Schema(
     servings: { type: Number, required: true },
     image: { type: String, default: "" },
     video: { type: String, default: "" },
-    ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }], // ✅ Store ratings
-    comments: [CommentSchema], // ✅ Store comments
-    
+    ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }],
+    comments: [CommentSchema],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // ✅ Fix: Add this field
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Recipe", RecipeSchema);
+const Recipe = mongoose.model("Recipe", RecipeSchema);
+module.exports = Recipe;

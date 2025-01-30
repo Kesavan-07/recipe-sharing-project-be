@@ -31,10 +31,9 @@ const recipeController = {
   // ✅ Get All Recipes (Includes Username)
   getAllRecipes: async (req, res) => {
     try {
-      const recipes = await Recipe.find({}).populate("user", "username email"); // ✅ Populate user details
+      const recipes = await Recipe.find({}).populate("user", "username email"); // ✅ Fix: Only populate username & email
       res.status(200).json(recipes);
     } catch (error) {
-      console.error("Error fetching recipes:", error);
       res.status(500).json({ message: "Server error", error: error.message });
     }
   },
