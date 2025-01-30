@@ -1,9 +1,20 @@
 const mongoose = require("mongoose");
 
 const CommentSchema = new mongoose.Schema({
-  user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-  text: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now },
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      text: { type: String, required: true },
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
+  ratings: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      rating: { type: Number, required: true },
+    },
+  ],
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 const RecipeSchema = new mongoose.Schema(
@@ -17,7 +28,7 @@ const RecipeSchema = new mongoose.Schema(
     video: { type: String, default: "" },
     ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }], // ✅ Store ratings
     comments: [CommentSchema], // ✅ Store comments
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // Reference to user
+    
   },
   { timestamps: true }
 );

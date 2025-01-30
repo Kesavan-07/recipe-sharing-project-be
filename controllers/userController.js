@@ -4,19 +4,19 @@ const Recipe = require("../models/Recipe");
 const userController = {
   // Fetch user profile
   getUserProfile: async (req, res) => {
-     try {
-       const user = req.user; 
-       if (!user) {
-         return res.status(404).json({ message: "User not found" });
-       }
+    try {
+      const user = req.user;
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-       const { password, ...userData } = user.toObject();
+      const { password, ...userData } = user.toObject();
 
-       res.status(200).json({ user: userData });
-     } catch (error) {
-       console.error("Error fetching user profile:", error);
-       res.status(500).json({ message: "Server error", error });
-     }
+      res.status(200).json({ user: userData });
+    } catch (error) {
+      console.error("Error fetching user profile:", error);
+      res.status(500).json({ message: "Server error", error });
+    }
   },
 
   // Update user profile
@@ -148,7 +148,7 @@ const userController = {
       res.status(500).json({ message: "Server error" });
     }
   },
-    uploadProfilePicture: async (req, res) => {
+  uploadProfilePicture: async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No file uploaded." });
@@ -163,10 +163,74 @@ const userController = {
       user.profilePicture = `/uploads/${req.file.filename}`;
       await user.save();
 
-      res.status(200).json({ message: "Profile picture updated successfully!" });
+      res
+        .status(200)
+        .json({ message: "Profile picture updated successfully!" });
     } catch (error) {
       console.error("Error uploading profile picture:", error);
       res.status(500).json({ message: "Server error", error });
+    }
+  },
+  followUser: async (req, res) => {
+    const { id } = req.params; // ID of the user to follow
+    const { userId } = req.body; // ID of the current user
+
+    try {
+      if (id === userId) {
+        return res.status(400).json({ message: "You cannot follow yourself." });
+      }
+
+      const userToFollow = await User.findById(id);
+      const currentUser = await User.findById(userId);
+
+      if (!userToFollow || !currentUser) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      if (!userToFollow.followers.includes(userId)) {
+        userToFollow.followers.push(userId);
+        currentUser.following.push(id);
+
+        await userToFollow.save();
+        await currentUser.save();
+
+        res.json({ message: "Followed successfully." });
+      } else {
+        res.status(400).json({ message: "Already following this user." });
+      }
+    } catch (error) {
+      console.error("Error following user:", error);
+      res.status(500).json({ message: "Server error." });
+    }
+  },
+
+  // Unfollow a User
+  unfollowUser: async (req, res) => {
+    const { id } = req.params; // ID of the user to unfollow
+    const { userId } = req.body; // ID of the current user
+
+    try {
+      const userToUnfollow = await User.findById(id);
+      const currentUser = await User.findById(userId);
+
+      if (!userToUnfollow || !currentUser) {
+        return res.status(404).json({ message: "User not found." });
+      }
+
+      userToUnfollow.followers = userToUnfollow.followers.filter(
+        (followerId) => followerId.toString() !== userId
+      );
+      currentUser.following = currentUser.following.filter(
+        (followingId) => followingId.toString() !== id
+      );
+
+      await userToUnfollow.save();
+      await currentUser.save();
+
+      res.json({ message: "Unfollowed successfully." });
+    } catch (error) {
+      console.error("Error unfollowing user:", error);
+      res.status(500).json({ message: "Server error." });
     }
   },
 };

@@ -1,10 +1,13 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const path = require("path"); 
+const path = require("path");
+
 const authRouter = require("./routes/authRoutes");
 const recipeRouter = require("./routes/recipeRoutes");
 const userRouter = require("./routes/userRoutes");
+const auth = require("./middleware/auth");
+const userController = require("./controllers/userController"); // ✅ Import User Controller
 
 const app = express();
 
@@ -35,7 +38,19 @@ app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/recipes", recipeRouter);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// ✅ Follow and Unfollow Routes
+app.post(
+  "/api/v1/users/:id/follow",
+  auth.verifyLogin,
+  userController.followUser
+);
+app.post(
+  "/api/v1/users/:id/unfollow",
+  auth.verifyLogin,
+  userController.unfollowUser
+);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the Recipe Sharing API!");
