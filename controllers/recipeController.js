@@ -1,31 +1,24 @@
 const Recipe = require("../models/Recipe");
+const cloudinary = require("../utils/cloudinary");
 
 const recipeController = {
   // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
  try {
-    const { title, ingredients, steps, cookingTime, servings, video } = req.body;
-    const image = req.file?.path || "";
+    // Upload the image to Cloudinary
+    const uploadedImage = await cloudinary.uploader.upload(req.file.path);
 
-    if (!title || !ingredients || !steps) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
-
+    // Create a new recipe with the Cloudinary image URL
     const newRecipe = new Recipe({
-      title,
-      ingredients: ingredients.split(","),
-      steps,
-      cookingTime,
-      servings,
-      image,
-      video,
-      createdAt: new Date(),
+      ...req.body,
+      image: uploadedImage.secure_url, // Save the secure Cloudinary URL
     });
 
-    const savedRecipe = await newRecipe.save();
-    res.status(201).json(savedRecipe);
+    await newRecipe.save(); // Save recipe to MongoDB
+
+    res.status(201).json(newRecipe); // Send success response
   } catch (error) {
-    console.error("Error creating recipe:", error);
+    console.error("Error creating recipe:", error.message || error);
     res.status(500).json({ message: "Failed to create recipe" });
   }
 },

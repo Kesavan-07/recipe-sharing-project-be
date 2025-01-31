@@ -1,4 +1,5 @@
 const express = require("express");
+const cloudinary = require("../utils/cloudinary");
 const recipeController = require("../controllers/recipeController");
 const auth = require("../middleware/auth");
 const upload = require("../middleware/uploadMiddleware");
@@ -10,8 +11,12 @@ const router = express.Router();
 router.get("/all", recipeController.getAllRecipes);
 
 // ✅ Protected Routes (Require Authentication)
-router.post("/create", auth.verifyLogin, upload.single("image"), recipeController.createRecipe);
-
+router.post(
+  "/create",
+  auth.verifyLogin, // Verify user is logged in
+  upload.single("image"), // Handle image file upload
+  recipeController.createRecipe // Call createRecipe controller
+);
 
 // ✅ Fix: Ensure this route comes BEFORE `/:id`
 router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
