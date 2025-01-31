@@ -4,32 +4,32 @@ const cloudinary = require("../utils/cloudinary");
 const recipeController = {
   // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
- try {
-   if (!req.file) {
-     return res.status(400).json({ message: "Image is required." });
-   }
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "Image is required." });
+      }
 
-   // Upload Image to Cloudinary
-   const uploadedImage = await cloudinary.uploader.upload(req.file.path);
+      // Upload Image to Cloudinary
+      const uploadedImage = await cloudinary.uploader.upload(req.file.path);
 
-   // Create a new recipe document
-   const newRecipe = new Recipe({
-     title: req.body.title,
-     ingredients: req.body.ingredients.split(","), // Ensure it's an array
-     instructions: req.body.instructions,
-     cookingTime: req.body.cookingTime,
-     servings: req.body.servings,
-     image: uploadedImage.secure_url, // Save Cloudinary URL
-     user: req.userId, // Ensure user is stored
-   });
+      // Create a new recipe document
+      const newRecipe = new Recipe({
+        title: req.body.title,
+        ingredients: req.body.ingredients.split(","), // Ensure it's an array
+        instructions: req.body.instructions,
+        cookingTime: req.body.cookingTime,
+        servings: req.body.servings,
+        image: uploadedImage.secure_url, // Save Cloudinary URL
+        user: req.userId, // Ensure user is stored
+      });
 
-   await newRecipe.save();
-   res.status(201).json(newRecipe);
- } catch (error) {
-   console.error("Error creating recipe:", error.message || error);
-   res.status(500).json({ message: "Failed to create recipe" });
- }
-},
+      await newRecipe.save();
+      res.status(201).json(newRecipe);
+    } catch (error) {
+      console.error("Error creating recipe:", error.message || error);
+      res.status(500).json({ message: "Failed to create recipe" });
+    }
+  },
 
   // ✅ Get All Recipes (Includes Username)
   getAllRecipes: async (req, res) => {
@@ -190,29 +190,33 @@ const recipeController = {
     }
   },
   likeRecipe: async (req, res) => {
-   try {
-    const recipeId = req.params.id;
-    const userId = req.userId; // User ID from auth middleware
+    try {
+      const recipeId = req.params.id;
+      const userId = req.userId; // User ID from auth middleware
 
-    const recipe = await Recipe.findById(recipeId);
+      const recipe = await Recipe.findById(recipeId);
 
-    if (!recipe) {
-      return res.status(404).json({ message: "Recipe not found" });
+      if (!recipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+
+      // Check if the user has already liked the recipe
+      if (recipe.likes.includes(userId)) {
+        recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
+      } else {
+        recipe.likes.push(userId);
+      }
+
+      await recipe.save();
+      res
+        .status(200)
+        .json({ message: "Recipe liked/unliked", likes: recipe.likes.length });
+    } catch (error) {
+      console.error("Error liking recipe:", error);
+      res
+        .status(500)
+        .json({ message: "Failed to like recipe", error: error.message });
     }
-
-    // Check if the user has already liked the recipe
-    if (recipe.likes.includes(userId)) {
-      recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
-    } else {
-      recipe.likes.push(userId);
-    }
-
-    await recipe.save();
-    res.status(200).json({ message: "Recipe liked/unliked", likes: recipe.likes.length });
-  } catch (error) {
-    console.error("Error liking recipe:", error);
-    res.status(500).json({ message: "Failed to like recipe", error: error.message });
-  }
   },
 };
 module.exports = recipeController;
