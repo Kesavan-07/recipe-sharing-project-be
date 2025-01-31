@@ -5,22 +5,30 @@ const recipeController = {
   // ✅ Create Recipe (With Image Upload)
   createRecipe: async (req, res) => {
  try {
-    // Upload the image to Cloudinary
-    const uploadedImage = await cloudinary.uploader.upload(req.file.path);
+   if (!req.file) {
+     return res.status(400).json({ message: "Image is required." });
+   }
 
-    // Create a new recipe with the Cloudinary image URL
-    const newRecipe = new Recipe({
-      ...req.body,
-      image: uploadedImage.secure_url, // Save the secure Cloudinary URL
-    });
+   // Upload Image to Cloudinary
+   const uploadedImage = await cloudinary.uploader.upload(req.file.path);
 
-    await newRecipe.save(); // Save recipe to MongoDB
+   // Create a new recipe document
+   const newRecipe = new Recipe({
+     title: req.body.title,
+     ingredients: req.body.ingredients.split(","), // Ensure it's an array
+     instructions: req.body.instructions,
+     cookingTime: req.body.cookingTime,
+     servings: req.body.servings,
+     image: uploadedImage.secure_url, // Save Cloudinary URL
+     user: req.userId, // Ensure user is stored
+   });
 
-    res.status(201).json(newRecipe); // Send success response
-  } catch (error) {
-    console.error("Error creating recipe:", error.message || error);
-    res.status(500).json({ message: "Failed to create recipe" });
-  }
+   await newRecipe.save();
+   res.status(201).json(newRecipe);
+ } catch (error) {
+   console.error("Error creating recipe:", error.message || error);
+   res.status(500).json({ message: "Failed to create recipe" });
+ }
 },
 
   // ✅ Get All Recipes (Includes Username)
