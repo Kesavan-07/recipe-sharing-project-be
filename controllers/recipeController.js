@@ -106,32 +106,29 @@ const recipeController = {
   },
   rateRecipe: async (req, res) => {
     try {
-      const { recipeId, rating } = req.body;
-      if (rating < 1 || rating > 5) {
-        return res
-          .status(400)
-          .json({ message: "Rating must be between 1 and 5 stars" });
-      }
+      const { id } = req.params;
+      const { userId, rating } = req.body;
 
-      const recipe = await Recipe.findById(recipeId);
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
+      const recipe = await Recipe.findById(id);
+      if (!recipe)
+        return res.status(404).json({ message: "Recipe not found." });
 
-      // Check if user already rated
-      const existingRating = recipe.ratings.find(
-        (r) => r.user.toString() === req.user.id
-      );
+      // Update or add rating
+      const existingRating = recipe.ratings.find((r) => r.userId === userId);
       if (existingRating) {
-        existingRating.rating = rating; // Update existing rating
+        existingRating.rating = rating;
       } else {
-        recipe.ratings.push({ user: req.user.id, rating });
+        recipe.ratings.push({ userId, rating });
       }
+
+      const totalRating = recipe.ratings.reduce((acc, r) => acc + r.rating, 0);
+      recipe.averageRating = totalRating / recipe.ratings.length;
 
       await recipe.save();
-      res.json({ message: "Rating submitted successfully" });
-    } catch (error) {
-      res.status(500).json({ message: "Server error", error });
+      res.status(200).json(recipe);
+    } catch (err) {
+      console.error("Error rating recipe:", err);
+      res.status(500).json({ message: "Server error" });
     }
   },
   // ✅ Comment on Recipe
@@ -191,31 +188,26 @@ const recipeController = {
   },
   likeRecipe: async (req, res) => {
     try {
-      const recipeId = req.params.id;
-      const userId = req.userId; // User ID from auth middleware
+      const { id } = req.params;
+      const { userId } = req.body;
 
-      const recipe = await Recipe.findById(recipeId);
+      const recipe = await Recipe.findById(id);
+      if (!recipe)
+        return res.status(404).json({ message: "Recipe not found." });
 
-      if (!recipe) {
-        return res.status(404).json({ message: "Recipe not found" });
-      }
-
-      // Check if the user has already liked the recipe
-      if (recipe.likes.includes(userId)) {
-        recipe.likes = recipe.likes.filter((id) => id.toString() !== userId);
+      // Toggle like
+      const isLiked = recipe.likes.includes(userId);
+      if (isLiked) {
+        recipe.likes = recipe.likes.filter((uid) => uid !== userId);
       } else {
         recipe.likes.push(userId);
       }
 
       await recipe.save();
-      res
-        .status(200)
-        .json({ message: "Recipe liked/unliked", likes: recipe.likes.length });
-    } catch (error) {
-      console.error("Error liking recipe:", error);
-      res
-        .status(500)
-        .json({ message: "Failed to like recipe", error: error.message });
+      res.status(200).json(recipe);
+    } catch (err) {
+      console.error("Error liking recipe:", err);
+      res.status(500).json({ message: "Server error" });
     }
   },
 };
