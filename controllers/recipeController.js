@@ -30,9 +30,23 @@ const recipeController = {
 
   createRecipe: async (req, res) => {
     try {
-      const uploadedImage = req.file
-        ? await cloudinary.uploader.upload(req.file.path)
-        : null;
+      let uploadedImage = null;
+      let uploadedVideo = null;
+
+      if (req.files?.image) {
+        uploadedImage = await cloudinary.uploader.upload(
+          req.files.image[0].path
+        );
+      }
+
+      if (req.files?.video) {
+        uploadedVideo = await cloudinary.uploader.upload(
+          req.files.video[0].path,
+          {
+            resource_type: "video", 
+          }
+        );
+      }
 
       const newRecipe = new Recipe({
         title: req.body.title,
@@ -41,6 +55,9 @@ const recipeController = {
         cookingTime: req.body.cookingTime,
         servings: req.body.servings,
         image: uploadedImage ? uploadedImage.secure_url : null,
+        video: uploadedVideo
+          ? uploadedVideo.secure_url
+          : req.body.videoUrl || null, 
         user: req.userId,
       });
 

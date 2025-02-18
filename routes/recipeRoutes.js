@@ -11,9 +11,13 @@ router.get("/search", recipeController.searchRecipes);
 router.post(
   "/create",
   auth.verifyLogin,
-  upload.single("image"),
+  upload.fields([
+    { name: "image", maxCount: 1 },
+    { name: "video", maxCount: 1 },
+  ]), 
   recipeController.createRecipe
 );
+
 
 router.get("/my-recipes", auth.verifyLogin, recipeController.getMyRecipes);
 router.get("/:id", recipeController.getRecipeById);
