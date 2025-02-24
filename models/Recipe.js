@@ -1,39 +1,28 @@
 const mongoose = require("mongoose");
 
-const CommentSchema = new mongoose.Schema({
-  comments: [
-    {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Fix: Reference User
-      text: { type: String, required: true },
-      createdAt: { type: Date, default: Date.now },
-    },
-  ],
+const recipeSchema = new mongoose.Schema({
+  title: String,
+  ingredients: [String],
+  instructions: String,
+  cookingTime: Number,
+  servings: Number,
+  image: String,
+  videoFileUrl: String,
+  videoURL: String,
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
   ratings: [
     {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" }, // ✅ Fix: Reference User
-      rating: { type: Number, required: true },
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      rating: Number,
     },
   ],
-  likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }], // ✅ Fix: Reference User
+  comments: [
+    {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      text: String,
+    },
+  ],
 });
 
-const RecipeSchema = new mongoose.Schema(
-  {
-    title: { type: String, required: true },
-    ingredients: { type: [String], required: true },
-    instructions: { type: String, required: true },
-    cookingTime: { type: String, required: true },
-    servings: { type: Number, required: true },
-    image: { type: String, default: "" },
-    video: { type: String, default: "" },
-    ratings: [{ user: mongoose.Schema.Types.ObjectId, rating: Number }],
-    comments: [CommentSchema],
-    likes: [String],
-
-    user: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true }, // ✅ Fix: Add this field
-  },
-  { timestamps: true }
-);
-
-const Recipe = mongoose.model("Recipe", RecipeSchema);
-module.exports = Recipe;
+module.exports = mongoose.model("Recipe", recipeSchema);

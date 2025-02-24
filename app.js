@@ -1,59 +1,52 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const path = require("path");
+const cloudinary = require("cloudinary").v2;
+const fs = require("fs");
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 const authRouter = require("./routes/authRoutes");
 const recipeRouter = require("./routes/recipeRoutes");
 const userRouter = require("./routes/userRoutes");
-const auth = require("./middleware/auth");
-const userController = require("./controllers/userController"); // ✅ Import User Controller
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
+});
 
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173", // For local development
-  "https://recipe-k7.netlify.app", // Deployed frontend
-];
-
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: ["http://localhost:5173", "https://recipe-k7.netlify.app"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 };
 
 app.use(cors(corsOptions));
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(cookieParser());
 
-// ✅ Use Routes
-app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/users", userRouter);
-app.use("/api/v1/recipes", recipeRouter);
-
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
-// ✅ Follow and Unfollow Routes
-app.post(
-  "/api/v1/users/:id/follow",
-  auth.verifyLogin,
-  userController.followUser
-);
-app.post(
-  "/api/v1/users/:id/unfollow",
-  auth.verifyLogin,
-  userController.unfollowUser
-);
-
-app.get("/", (req, res) => {
-  res.send("Welcome to the Recipe Sharing API!");
+// Multer Storage for File Uploads
+const storage = multer.diskStorage({
+  destination: "./uploads",
+  filename: (req, file, cb) => {
+    cb(null, uuidv4() + "_" + file.originalname);
+  },
 });
+
+const upload = multer({ storage });
+
+// ✅ API Routes
+app.use("/", authRouter);
+app.use("/", userRouter);
+app.use("/", recipeRouter);
+
+app.get("/", (req, res) => res.send("Welcome to the Recipe Sharing API!"));
 
 module.exports = app;

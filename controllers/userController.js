@@ -5,36 +5,63 @@ const userController = {
   // Fetch user profile
   getUserProfile: async (req, res) => {
     try {
-      const user = req.user;
+      const user = await User.findById(req.userId).select("-password"); // Exclude password
+
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      const { password, ...userData } = user.toObject();
-
-      res.status(200).json({ user: userData });
+      res.status(200).json({ user });
     } catch (error) {
-      console.error("Error fetching user profile:", error);
-      res.status(500).json({ message: "Server error", error });
+      console.error("❌ Error fetching user profile:", error);
+      res.status(500).json({ message: "Server error" });
     }
   },
 
   // Update user profile
   updateUserProfile: async (req, res) => {
-    const { username, email, bio, profilePicture } = req.body;
-
     try {
-      const user = await User.findByIdAndUpdate(
-        req.userId, // ✅ Fixed `req.user.id` to `req.userId`
-        { username, email, bio, profilePicture },
-        { new: true, runValidators: true }
-      ).select("-password");
+      const {
+        username,
+        email,
+        bio,
+        location,
+        phoneNumber,
+        website,
+        profilePicture,
+      } = req.body;
+      console.log(
+        username,
+        email,
+        bio,
+        location,
+        phoneNumber,
+        website,
+        profilePicture
+      );
 
-      if (!user) {
+      // Find and update the user
+      const updatedUser = await User.findByIdAndUpdate(
+        req.userId, // Extracted from authMiddleware
+        {
+          username,
+          email,
+          bio,
+          location,
+          phoneNumber,
+          website,
+          profilePicture,
+        },
+        { new: true, runValidators: true } // Return updated document and validate input
+      ).select("-password"); // Exclude password field
+      console.log(updatedUser);
+      if (!updatedUser) {
         return res.status(404).json({ message: "User not found" });
       }
 
-      res.status(200).json({ message: "Profile updated successfully", user });
+      res
+        .status(200)
+        .json({ message: "Profile updated successfully", user: updatedUser });
     } catch (error) {
       console.error("Error updating user profile:", error);
       res.status(500).json({ message: "Server error" });
