@@ -1,7 +1,7 @@
 you can use this for logging in 
 
--jojo@gmail.com
--Ghost@123#
+-   jojo@gmail.com
+-   Ghost@123#
 And also here are few of the screenshots for your reference
 
 
