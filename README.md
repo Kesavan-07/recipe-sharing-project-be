@@ -1,8 +1,7 @@
-you can use this for logging in 
-
+-   you can use this for logging in 
 -   jojo@gmail.com
 -   Ghost@123#
-And also here are few of the screenshots for your reference
+-   And also here are few of the screenshots for your reference
 
 
 <img width="1461" alt="Screenshot 2025-02-26 at 7 20 55 PM" src="https://github.com/user-attachments/assets/d5ccb72d-3d8e-4182-9938-dbd2fa779381" />
