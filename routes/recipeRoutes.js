@@ -2,6 +2,7 @@ const express = require("express");
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const Recipe = require("../models/Recipe");
+const User = require("../models/User");
 const { verifyLogin } = require("../middleware/auth");
 
 const router = express.Router();
@@ -187,7 +188,7 @@ router.patch("/recipe/command/:id", verifyLogin, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-router.get("/comments/:id", verifyLogin, async (req, res) => {
+router.get("/comments/:id", async (req, res) => {
   try {
     const recipe = await Recipe.findById(req.params.id).populate(
       "comments.user",
@@ -267,6 +268,34 @@ router.get("/rating/:id", verifyLogin, async (req, res) => {
       message: "Failed to fetch recipe ratings",
       error: error.message,
     });
+  }
+});
+router.patch("/recipe/follow/:id", verifyLogin, async (req, res) => {
+  try {
+    const recipeId = req.params.id;
+    const userId = req.user.id; // Assuming `verifyLogin` middleware adds `user` to `req`
+
+    const recipe = await Recipe.findById(recipeId);
+    if (!recipe) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    // Check if the user has already liked the recipe
+    const index = recipe.likes.indexOf(userId);
+    if (index === -1) {
+      // Like the recipe
+      recipe.likes.push(userId);
+    } else {
+      // Unlike the recipe
+      recipe.likes.splice(index, 1);
+    }
+
+    await recipe.save();
+    res
+      .status(200)
+      .json({ message: "Like status updated", likes: recipe.likes });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 
