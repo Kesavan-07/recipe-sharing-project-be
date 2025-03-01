@@ -20,16 +20,16 @@ cloudinary.config({
 
 const app = express();
 
-// const corsOptions = {
-//   origin: ["https://recipe-k7.netlify.app", "http://localhost:5173"],
-//   //   origin: ["http://localhost:5173", "https://recipe-k7.netlify.app/"],
+const corsOptions = {
+  origin: ["https://recipe-k7.netlify.app", "http://localhost:5173"],
+  //   origin: ["http://localhost:5173", "https://recipe-k7.netlify.app/"],
 
-//   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-//   allowedHeaders: ["Content-Type", "Authorization"],
-//   credentials: true,
-// };
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
