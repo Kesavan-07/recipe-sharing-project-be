@@ -80,7 +80,7 @@ router.delete("/myRecipes/:id", verifyLogin, async (req, res) => {
   try {
     const deletedRecipe = await Recipe.findOneAndDelete({
       _id: req.params.id,
-      createdBy: req.user.id, // Ensure the user can only delete their own recipes
+      createdBy: req.userId, // Ensure the user can only delete their own recipes
     });
 
     if (!deletedRecipe) {
@@ -140,7 +140,7 @@ router.get("/likes/:id", verifyLogin, async (req, res) => {
 router.patch("/recipe/like/:id", verifyLogin, async (req, res) => {
   try {
     const recipeId = req.params.id;
-    const userId = req.user.id; // Assuming `verifyLogin` middleware adds `user` to `req`
+    const userId = req.userId; // Assuming `verifyLogin` middleware adds `user` to `req`
 
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
@@ -168,7 +168,7 @@ router.patch("/recipe/like/:id", verifyLogin, async (req, res) => {
 router.patch("/recipe/command/:id", verifyLogin, async (req, res) => {
   try {
     const recipeId = req.params.id;
-    const userId = req.user.id; // Assuming `verifyLogin` middleware adds `user` to `req`
+    const userId = req.userId; // Assuming `verifyLogin` middleware adds `user` to `req`
     const { text } = req.body;
     if (!text) {
       return res.status(400).json({ message: "Comment text is required" });
@@ -211,7 +211,7 @@ router.get("/comments/:id", async (req, res) => {
 router.patch("/recipe/rating/:id", verifyLogin, async (req, res) => {
   try {
     const recipeId = req.params.id;
-    const userId = req.user.id; // Assuming `verifyLogin` middleware adds `user` to `req`
+    const userId = req.userId; // Assuming `verifyLogin` middleware adds `user` to `req`
     const { rating } = req.body;
     if (!rating) {
       return res.status(400).json({ message: "rating is required" });
@@ -257,7 +257,7 @@ router.get("/rating/:id", verifyLogin, async (req, res) => {
       "ratings.user",
       "username profilePicture"
     );
-    const userId = req.user.id;
+    const userId = req.userId;
     if (!recipe) {
       return res.status(404).json({ message: "Recipe not found" });
     }
@@ -273,7 +273,7 @@ router.get("/rating/:id", verifyLogin, async (req, res) => {
 router.patch("/recipe/follow/:id", verifyLogin, async (req, res) => {
   try {
     const recipeId = req.params.id;
-    const userId = req.user.id; // Assuming `verifyLogin` middleware adds `user` to `req`
+    const userId = req.userId; // Assuming `verifyLogin` middleware adds `user` to `req`
 
     const recipe = await Recipe.findById(recipeId);
     if (!recipe) {
