@@ -74,7 +74,9 @@ const authController = {
       }
 
       // Generate JWT Token
-      const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+        expiresIn: "1h",
+      });
 
       // Set cookie with token
       res.cookie("token", token, {
