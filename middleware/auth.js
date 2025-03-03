@@ -1,22 +1,25 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { JWT_SECRET } = require("../utils/config");
 
 const auth = {
-  // Middleware to verify login using token from cookies
+  // Middleware to verify login using token from Authorization header
   verifyLogin: async (req, res, next) => {
     try {
-      const { token } = req.cookies;
+      const authHeader = req.headers.authorization;
 
-      if (!token) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res
           .status(401)
           .json({ message: "Unauthorized: No token provided." });
       }
 
+      const token = authHeader.split(" ")[1]; // Extract token from "Bearer <token>"
+
       // Verify token
       let decoded;
       try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET);
+        decoded = jwt.verify(token, JWT_SECRET);
       } catch (error) {
         return res
           .status(401)

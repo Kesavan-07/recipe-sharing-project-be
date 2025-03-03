@@ -21,7 +21,7 @@ userRouter.delete(
 userRouter.get("/alluser", auth.verifyLogin, userController.allUser);
 userRouter.post("/follow/:id", auth.verifyLogin, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const user = await User.findById(userId);
     const targetUser = await User.findById(req.params.id);
     console.log(user, targetUser);
@@ -44,7 +44,7 @@ userRouter.post("/follow/:id", auth.verifyLogin, async (req, res) => {
 
 userRouter.get("/following", auth.verifyLogin, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const user = await User.findById(userId).populate("following");
 
     res.json(user.following);
@@ -54,7 +54,7 @@ userRouter.get("/following", auth.verifyLogin, async (req, res) => {
 });
 userRouter.get("/followers", auth.verifyLogin, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
 
     // Find all users who have the logged-in user in their "following" array
     const followers = await User.find({ following: userId });
@@ -67,7 +67,7 @@ userRouter.get("/followers", auth.verifyLogin, async (req, res) => {
 
 userRouter.post("/unfollow/:id", auth.verifyLogin, async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.userId;
     const unfollowId = req.params.id;
 
     // Remove unfollowed user from the following list of the logged-in user
